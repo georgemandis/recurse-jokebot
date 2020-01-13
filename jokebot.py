@@ -27,7 +27,7 @@ class JokeBotHandler(object):
 
         msg_content = message['content'].lower()
         if msg_content.startswith("add"):
-            new_joke = msg_content.replace("add", "").replace('\\n', '\n').strip()
+            new_joke = message['content'].replace("add", "").replace('\\n', '\n').strip()
             new_joke_dict = {
                 "joke": new_joke,
                 "submitted_by": message['sender_email'],
