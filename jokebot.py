@@ -10,6 +10,7 @@ class JokeBotHandler(object):
     def __init__(self):
         self.commands = {
             "joke": self.tell_joke,
+            "best": self.tell_best_joke,
             "list": self.list_jokes,
             "add": self.add_joke,
             "up": self.upvote,
@@ -41,6 +42,17 @@ class JokeBotHandler(object):
         content = "# Joke #{}:\n\n{}\n\n *submitted by {}*".format(
             returned_joke_index, returned_joke['joke'], returned_joke['submitted_by'])
 
+        return content
+    
+    def tell_best_joke(self, args, jokes, message=None):
+        if len(jokes) == 0:
+            return "I don't know any jokes yet. Teach me some!"
+                
+        best_joke = max(jokes, key=lambda d: d['score'] )   
+            
+        content = "Here's my best joke:\n\n{}\n\n *submitted by {}*".format(
+        best_joke['joke'], best_joke['submitted_by'])
+        
         return content
 
     def list_jokes(self, args, jokes, message=None):
@@ -135,6 +147,7 @@ class JokeBotHandler(object):
 `add [joke]` -- Submit a joke of your own (Be aware your RC Zulip name will be attached to live on in infamy!)
 `up [joke-id]` -- Give a +1 vote to a specific joke.
 `down [joke-id]` -- Give a -1 vote to a specific joke.        
+`best` -- Return the joke with the highest score
         
         '''
 
