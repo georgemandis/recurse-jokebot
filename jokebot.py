@@ -4,8 +4,8 @@ import json
 
 class JokeBotHandler(object):
 
-    SUCCESS_THRESHOLD = 12
-    FAILURE_THRESHOLD = 9    
+    SUCCESS_THRESHOLD = 20
+    FAILURE_THRESHOLD = 0   
 
     def __init__(self):
         self.commands = {
