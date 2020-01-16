@@ -48,10 +48,10 @@ class JokeBotHandler(object):
         if len(jokes) == 0:
             return "I don't know any jokes yet. Teach me some!"
                 
-        best_joke = max(jokes, key=lambda d: d['score'] )   
-            
-        content = "Here's my best joke:\n\n{}\n\n *submitted by {}*".format(
-        best_joke['joke'], best_joke['submitted_by'])
+        best_joke_index, best_joke = max(enumerate(jokes), key=lambda item: item[1]["score"])        
+              
+        content = "Here's joke #{}. It's my best joke:\n\n{}\n\n *submitted by {}*".format(
+        best_joke_index, best_joke['joke'], best_joke['submitted_by'])
         
         return content
 
