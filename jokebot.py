@@ -19,6 +19,8 @@ class JokeBotHandler(object):
             "default": self.usage
         }
 
+        self.jokes = self.get_jokes()
+
     def tell_joke(self, args, jokes, message=None):
         if len(jokes) == 0:
             return "I don't know any jokes yet. Teach me some!"
@@ -161,7 +163,7 @@ class JokeBotHandler(object):
 
     def handle_message(self, message, bot_handler):
         self.bot_handler = bot_handler
-        jokes = self.get_jokes()
+        jokes = self.jokes
         msg_content = message['content']
         command = msg_content.split()[0]
         args = msg_content.split()[1:]
