@@ -11,7 +11,7 @@ class JokeBotHandler(object):
         self.commands = {
             "joke": self.tell_joke,
             "best": self.tell_best_joke,
-            "list": self.list_jokes,
+            "recent": self.recent_jokes,
             "add": self.add_joke,
             "up": self.upvote,
             "down": self.downvote,
@@ -57,12 +57,12 @@ class JokeBotHandler(object):
         
         return content
 
-    def list_jokes(self, args, jokes, message=None):
+    def recent_jokes(self, args, jokes, message=None):
         if len(jokes) == 0:
             return "I don't know any jokes yet. Teach me some!"
 
         format_string = "{}: {}\n(submitted by {})"
-        return "\n\n".join([format_string.format(index, d['joke'], d['submitted_by']) for index, d in enumerate(jokes)])
+        return "\n\n".join([format_string.format(index, d['joke'], d['submitted_by']) for index, d in enumerate(jokes)][-10:])
 
     def add_joke(self, args, jokes, message):
         new_joke = message['content'].replace(
@@ -76,9 +76,10 @@ class JokeBotHandler(object):
         }
 
         jokes.append(new_joke_dict)
+        new_joke_id = len(jokes) - 1
         # storage.put('jokes', jokes, message=None)
         self.save_jokes(jokes)
-        content = "Joke added!  Hilarious. \n\n " + new_joke
+        content = "Joke added!  Hilarious. Here's joke #{} \n\n{}".format(new_joke_id, new_joke)
 
         return content
 
@@ -145,11 +146,12 @@ class JokeBotHandler(object):
         return '''🤪 Hi! I'm the joke bot. I maintain a list of Recurser-curated jokes you can retrieve, vote on and add to. Here are some different commands you can use to interact with me:\n  \n
 
 
-`joke` -- I'll tell you a randomly selected joke
-`add [joke]` -- Submit a joke of your own (Be aware your RC Zulip name will be attached to live on in infamy!)
+`joke [optional joke-id]` -- I'll tell you a randomly selected joke or the joke you requested
+`add [joke]` -- Submit a joke of your own (Your RC Zulip name will be attached)
 `up [joke-id]` -- Give a +1 vote to a specific joke.
 `down [joke-id]` -- Give a -1 vote to a specific joke.        
 `best` -- Return the joke with the highest score
+`recent` -- Show the 10 most recently added jokes
         
         '''
 
