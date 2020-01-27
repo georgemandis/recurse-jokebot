@@ -1,12 +1,15 @@
 import random
 import json
+import os
 
 
 class JokeBotHandler(object):
 
+    JOKE_FILE = "jokes.json"
     SUCCESS_THRESHOLD = 20
     FAILURE_THRESHOLD = 0   
-
+              
+    
     def __init__(self):
         self.commands = {
             "joke": self.tell_joke,
@@ -19,10 +22,19 @@ class JokeBotHandler(object):
             "default": self.usage
         }
 
-        self.jokes = self.get_jokes()
+        filename = os.path.join(os.path.dirname(__file__), self.JOKE_FILE)
+        with open(filename) as json_file:
+            self.jokes = json.load(json_file)['jokes']        
 
+            
+    def save_jokes(self, jokes, message=None):
+        filename = os.path.join(os.path.dirname(__file__), self.JOKE_FILE)
+        with open(filename, 'w') as json_file:
+            json.dump({"jokes": jokes}, json_file)
+
+        
     def tell_joke(self, args, jokes, message=None):
-        if len(jokes) == 0:
+        if not jokes or len(jokes) == 0:
             return "I don't know any jokes yet. Teach me some!"
 
         if args and args[0]:
@@ -41,10 +53,11 @@ class JokeBotHandler(object):
             returned_joke_index = random.randint(0, len(good_jokes) - 1)
             returned_joke = good_jokes[returned_joke_index]
 
-        content = "# Joke #{}:\n\n{}\n\n *submitted by {}*".format(
+        content = "Joke #{}:\n\n{}\n\n *submitted by {}*".format(
             returned_joke_index, returned_joke['joke'], returned_joke['submitted_by'])
 
         return content
+    
     
     def tell_best_joke(self, args, jokes, message=None):
         if len(jokes) == 0:
@@ -57,6 +70,7 @@ class JokeBotHandler(object):
         
         return content
 
+    
     def recent_jokes(self, args, jokes, message=None):
         if len(jokes) == 0:
             return "I don't know any jokes yet. Teach me some!"
@@ -64,6 +78,7 @@ class JokeBotHandler(object):
         format_string = "{}: {}\n(submitted by {})"
         return "\n\n".join([format_string.format(index, d['joke'], d['submitted_by']) for index, d in enumerate(jokes)][-10:])
 
+    
     def add_joke(self, args, jokes, message):
         new_joke = message['content'].replace(
             "add", "").replace('\\n', '\n').strip()
@@ -83,12 +98,15 @@ class JokeBotHandler(object):
 
         return content
 
+    
     def upvote(self, args, jokes, message):
         return self.vote(args, 1, jokes)
 
+    
     def downvote(self, args, jokes, message=None):
         return self.vote(args, -1, jokes)
-        
+    
+    
     def vote(self, args, adjustment, jokes):
         try:
             joke_index = int(args[0])
@@ -142,6 +160,7 @@ class JokeBotHandler(object):
 
         return content        
 
+    
     def usage(self, args=None, jokes=None, message=None):
         return '''🤪 Hi! I'm the joke bot. I maintain a list of Recurser-curated jokes you can retrieve, vote on and add to. Here are some different commands you can use to interact with me:\n  \n
 
@@ -155,22 +174,21 @@ class JokeBotHandler(object):
         
         '''
 
-    def get_jokes(self):
-        with open('./jokes.json') as json_file:
-            return json.load(json_file)['jokes']
-
-    def save_jokes(self, jokes, message=None):
-        with open('./jokes.json', 'w') as json_file:
-            json.dump({"jokes": jokes}, json_file)
-
+            
     def handle_message(self, message, bot_handler):
         self.bot_handler = bot_handler
         jokes = self.jokes
         msg_content = message['content']
-        command = msg_content.split()[0]
-        args = msg_content.split()[1:]
-        content = self.commands.get(
-            command, self.commands['default'])(args, jokes, message)
+        
+        # if user didn't send a message, display help screen
+        if msg_content:      
+            command = msg_content.split()[0]
+            args = msg_content.split()[1:]
+            content = self.commands.get(
+                command.lower(), self.commands['default'])(args, jokes, message)
+        else:
+            content = self.commands.get("default")()
+
 
         bot_handler.send_reply(message, content)
 
