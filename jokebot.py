@@ -80,8 +80,8 @@ class JokeBotHandler(object):
 
     
     def add_joke(self, args, jokes, message):
-        new_joke = message['content'].replace(
-            "add", "").replace('\\n', '\n').strip()
+        # strip the command & initial space (i.e. 'add ') from the joke content 
+        new_joke = message['content'][4:].replace('\\n', '\n').strip()
         new_joke_dict = {
             "joke": new_joke,
             # zulip-terminal doesn't return sender_full_name and other metadata
@@ -183,7 +183,7 @@ class JokeBotHandler(object):
         # if user didn't send a message, display help screen
         if msg_content:      
             command = msg_content.split()[0]
-            args = msg_content.split()[1:]
+            args = msg_content.split()[1:]            
             content = self.commands.get(
                 command.lower(), self.commands['default'])(args, jokes, message)
         else:
